@@ -1,7 +1,7 @@
 import UIKit
 
 final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
-
+    
     @IBOutlet private weak var textLabel: UILabel!
     @IBOutlet private weak var imageView: UIImageView!
     @IBOutlet private weak var counterLabel: UILabel!
@@ -10,18 +10,21 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     @IBOutlet private weak var noButton: UIButton!
     
     // MARK: - Lifecycle
-
+    
     private var correctAnswers = 0
     private var currentQuestionIndex = 0
     private let questionsAmount = 10
     private var questionFactory: QuestionFactoryProtocol = QuestionFactory()
     private var currentQuestion: QuizQuestion?
+    private var alertPresenter = AlertPresenter ()
+    private var statisticService: StatisticServiceProtocol = StatisicService ()
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
         questionFactory.delegate = self
         questionFactory.requestNextQuestion()
-
+        
         setupFonts()
         setupImageView()
     }
@@ -30,7 +33,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         let customFont = UIFont(name: "YSDisplay-Medium", size: 20)
         yesButton.titleLabel?.font = customFont
         noButton.titleLabel?.font = customFont
-                
+        
         questionTitleLabel.font = customFont
         counterLabel.font = customFont
         textLabel.font = UIFont(name: "YSDisplay-Bold", size: 23)
@@ -53,9 +56,9 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         
         currentQuestion = question
         let viewModel = convert(model: question)
-                
+        
         DispatchQueue.main.async { [weak self] in
-        self?.show(quiz: viewModel)
+            self?.show(quiz: viewModel)
         }
     }
     
@@ -94,16 +97,16 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     }
     
     private func styleImageView() {
-            imageView.layer.masksToBounds = true
-            imageView.layer.borderWidth = 8
-            imageView.layer.cornerRadius = 20
-            imageView.layer.borderColor = UIColor.ypBlack.cgColor
-        }
-
+        imageView.layer.masksToBounds = true
+        imageView.layer.borderWidth = 8
+        imageView.layer.cornerRadius = 20
+        imageView.layer.borderColor = UIColor.ypBlack.cgColor
+    }
+    
     
     private func showAnswer (answer: Bool) {
         guard let currentQuestion = currentQuestion else { return }
-
+        
         if currentQuestion.correctAnswer == answer {
             imageView.layer.borderColor = UIColor.ypGreen.cgColor
             correctAnswers += 1
@@ -127,16 +130,32 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     }
     
     private func showResult () {
-        let alert = UIAlertController(title: "Этот раунд окончен!",
-                                      message: "Ваш результат \(correctAnswers)/\(questionsAmount)",
-                                      preferredStyle: .alert)
-        let action = UIAlertAction(title: "Сыграть еще раз", style: .default) { [weak self] _ in
-            guard let self = self else { return }
-            self.correctAnswers = 0
-            self.currentQuestionIndex = 0
-            self.questionFactory.requestNextQuestion()
+        statisticService.store(correct: correctAnswers, total: questionsAmount)
+        
+        let resultMessage = "\(correctAnswers)/\(questionsAmount)"
+        let numberOfQuizes = statisticService.gamesCount
+        let record: String
+        
+        if let bestGame = statisticService.bestGame {
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateFormat = "dd.MM.yyyy hh:mm"
+            let dateString = dateFormatter.string(from: bestGame.date)
+            record = "\(bestGame.correct)/\(bestGame.total) (\(dateString))"
+        } else {
+            record = "Not found"
         }
-        alert.addAction(action)
-        self.present(alert, animated: true, completion: nil)
+        
+        let averageAccuracy = statisticService.totalAccuracy
+        
+        alertPresenter.showResult(
+            result: resultMessage,
+            numberOfQuizes: numberOfQuizes,
+            record: record,
+            averageAccuracy: averageAccuracy,
+            from: self) { [weak self] in
+                self?.correctAnswers = 0
+                self?.currentQuestionIndex = 0
+                self?.questionFactory.requestNextQuestion()
+            }
     }
 }
