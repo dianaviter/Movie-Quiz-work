@@ -16,8 +16,8 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     private let questionsAmount = 10
     private var questionFactory: QuestionFactoryProtocol = QuestionFactory()
     private var currentQuestion: QuizQuestion?
-    private var alertPresenter = AlertPresenter ()
-    private var statisticService: StatisticServiceProtocol = StatisicService ()
+    private let alertPresenter: AlertPresenterProtocol = AlertPresenter()
+    private let statisticService: StatisticServiceProtocol = StatisicService()
     
     
     override func viewDidLoad() {

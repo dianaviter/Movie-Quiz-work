@@ -8,9 +8,11 @@
 import Foundation
 import UIKit
 
-class StatisicService: StatisticServiceProtocol {
+final class StatisicService: StatisticServiceProtocol {
     
     private let storage: UserDefaults = .standard
+    private let encoder = JSONEncoder()
+    private let decoder = JSONDecoder()
     
     private enum Keys: String {
         case correct = "correctScore"
@@ -33,14 +35,14 @@ class StatisicService: StatisticServiceProtocol {
     var bestGame: GameResult? {
         get {
             guard let data = storage.data(forKey: Keys.bestGame.rawValue),
-                  let decodedResult = try? JSONDecoder().decode(GameResult.self, from: data) else {
+                  let decodedResult = try? decoder.decode(GameResult.self, from: data) else {
                 return nil
             }
             return decodedResult
         }
         set {
             if let newValue = newValue,
-               let data = try? JSONEncoder().encode(newValue) {
+               let data = try? encoder.encode(newValue) {
                 storage.set(data, forKey: Keys.bestGame.rawValue)
             } else {
                 storage.removeObject(forKey: Keys.bestGame.rawValue)
@@ -72,14 +74,17 @@ class StatisicService: StatisticServiceProtocol {
             if currentResult.correct > bestResult.correct || (currentResult.correct == bestResult.correct && currentResult.date < bestResult.date) {
                 bestGame = currentResult
             }
-            
-            correctAnswers += correct
-            storage.set(storage.integer(forKey: Keys.totalInGame.rawValue) + total, forKey: Keys.totalInGame.rawValue)
-            
-            gamesCount += 1
+        } else {
+            bestGame = currentResult
         }
+        
+        correctAnswers += correct
+        storage.set(storage.integer(forKey: Keys.totalInGame.rawValue) + total, forKey: Keys.totalInGame.rawValue)
+        
+        gamesCount += 1
     }
 }
+
 
 
 

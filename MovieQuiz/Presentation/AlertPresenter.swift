@@ -9,7 +9,13 @@ import Foundation
 import UIKit
 
 class AlertPresenter: AlertPresenterProtocol {
-    func showResult(result: String, numberOfQuizes: Int, record: String, averageAccuracy: Double, from viewController: UIViewController, completion: @escaping () -> Void) {
+    func showResult(
+        result: String,
+        numberOfQuizes: Int,
+        record: String,
+        averageAccuracy: Double,
+        from viewController: UIViewController,
+        completion: @escaping () -> Void) {
         
         let alert = UIAlertController(title: "Этот раунд окончен!",
                                       message: """
