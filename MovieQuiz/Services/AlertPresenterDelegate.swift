@@ -6,7 +6,8 @@
 //
 
 import Foundation
+import UIKit
 
-protocol AlertPresenterDelegate: AnyObject {
-
+protocol AlertPresenterDelegate: UIViewController {
+    func showAlert (quiz: AlertModel)
 }

@@ -14,7 +14,7 @@ protocol MoviesLoading {
 struct MoviesLoader: MoviesLoading {
     private let networkClient = NetworkClient()
     private var mostPopularMoviesUrl: URL {
-        guard let url = URL (string: "https://tv-api.com/en/API/Top250Movies/k_zcuw1ytf") else {
+        guard let url = URL(string: "https://tv-api.com/en/API/Top250Movies/k_zcuw1ytf") else {
             preconditionFailure("Unable to construct mostPopularMoviesUrl")
         }
         return url
@@ -28,7 +28,7 @@ struct MoviesLoader: MoviesLoading {
                     let mostPopularMovies = try JSONDecoder().decode(MostPopularMovies.self, from: data)
                     handler(.success(mostPopularMovies))
                 } catch {
-                    handler (.failure(error))
+                    handler(.failure(error))
                 }
             case .failure(let error):
                 handler(.failure(error))

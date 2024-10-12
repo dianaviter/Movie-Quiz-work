@@ -9,28 +9,22 @@ import Foundation
 import UIKit
 
 class AlertPresenter: AlertPresenterProtocol {
-    func showResult(
-        result: String,
-        numberOfQuizes: Int,
-        record: String,
-        averageAccuracy: Double,
-        from viewController: UIViewController,
-        completion: @escaping () -> Void) {
-        
-        let alert = UIAlertController(title: "Этот раунд окончен!",
-                                      message: """
-                                        Ваш результат \(result)
-                                        Количество сыгранных квизов: \(numberOfQuizes)
-                                        Рекорд: \(record)
-                                        Средняя точность: \(String(format: "%.2f", averageAccuracy * 100))%
-                                        """,
-                                      preferredStyle: .alert)
-        let action = UIAlertAction(title: "Сыграть еще раз", style: .default) { _ in
-            completion ()
+    weak var delegate: AlertPresenterDelegate?
+    
+    func showAlert(quiz: AlertModel) {
+        if let delegate = delegate {
+            let alert = UIAlertController (
+                title: quiz.title,
+                message: quiz.message,
+                preferredStyle: .alert)
+            
+        let action = UIAlertAction(
+            title: quiz.buttonText,
+            style: .default) { _ in
+                quiz.completion ()
+            }
+            alert.addAction(action)
+            delegate.present(alert, animated: true, completion: nil)
         }
-        alert.addAction(action)
-        viewController.present(alert, animated: true, completion: nil)
     }
-
 }
-
