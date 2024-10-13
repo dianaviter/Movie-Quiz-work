@@ -8,7 +8,8 @@
 import Foundation
 
 protocol QuestionFactoryProtocol {
-    var delegate: QuestionFactoryDelegate? { get set }
+    var delegate: QuestionFactoryDelegate? { get }
 
     func requestNextQuestion ()
+    func loadData()
 }
